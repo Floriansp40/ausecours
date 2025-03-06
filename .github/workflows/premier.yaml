@@ -10,7 +10,7 @@ on:
 
 jobs:
   Backend:
-    if: ${{github.event_name == 'push'}}
+    if: ${{github.event_name == 'pull_request'}}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -170,13 +170,13 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
 
-  # Biderie:
-  #   needs: [test2]
-  #   uses: ./.github/workflows/ghcr.yaml
-  #   secrets: inherit
-  #   permissions:
-  #     contents: read
-  #     packages: write
+  Biderie:
+    if: ${{github.event_name == 'push'}}
+    uses: ./.github/workflows/ghcr.yaml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
 
   # Chelouterie:
   #   needs: [Biderie]
