@@ -32,7 +32,7 @@ app.use( (req, res, next) => {
 })
 
 /*** MAIN ROUTER */
-app.get('/', (req, res) => res.send(`I'm online. All is OK !....`))
+app.get('/rt', (req, res) => res.send(`I'm online. All is OK !....`))
 
 app.use('/auth', auth_router)
 app.use('/users', checkToken, user_router)
