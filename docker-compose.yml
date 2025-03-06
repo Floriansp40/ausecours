@@ -21,3 +21,9 @@ services:
     environment:
       BDD_HOST: master-bdd
       BDD_PORT: 3306
+
+  master-front:
+    container_name: master-front
+    image: ghcr.io/floriansp40/front-ausecours:latest
+    ports:
+      - 80:80
