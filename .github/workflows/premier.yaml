@@ -93,16 +93,92 @@ jobs:
       - name: test Backup Container
         if: success()
         run: curl http://127.0.0.1:23000
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: Cypress E2E Install
+        uses: cypress-io/github-action@v6
+        with:
+          runTests: false
+          working-directory: frontend
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Start E2E  Test
+        uses: cypress-io/github-action@v6
+        with: 
+          install: false
+          working-directory: frontend
+          start: npm run dev
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos
+          path: frontend/cypress/videos
+          retention-days: 3
+
+      - name: Clean Builder Backend Docker
+        if: always()
+        working-directory: backend
+        run: docker compose -f docker-compose-build.yml down
+
+  QualityBack:
+    needs: [Backend, Frontend]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: SonarCloud
+        uses: SonarSource/sonarcloud-github-action@v3.1.0
+        with:
+          projectBaseDir: ./backend
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACK }}
+  
+  QualityFront:
+    needs: [Backend, Frontend]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # - name: SonarCloud
+      #   uses: SonarSource/sonarcloud-github-action@v3.1.0
+      #   with:
+      #     projectBaseDir: ./frontend
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
 
       
         
-  # Biderie:
-  #   needs: [test2]
-  #   uses: ./.github/workflows/ghcr.yaml
-  #   secrets: inherit
-  #   permissions:
-  #     contents: read
-  #     packages: write
+  Biderie:
+    if: ${{github.event_name == 'push'}}
+    uses: ./.github/workflows/ghcr.yaml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
 
   # Chelouterie:
   #   needs: [Biderie]
