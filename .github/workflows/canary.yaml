@@ -76,5 +76,5 @@ jobs:
 
           script: |
             docker pull ghcr.io/tristan640/back-ausecours:latest
-            docker-compose up -d
+            docker compose up -d
             
